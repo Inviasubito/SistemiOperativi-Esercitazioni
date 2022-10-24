@@ -1,18 +1,14 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <string.h>
-
-#define MAX_IT 5
+#include <unistd.h>	//fork
+#include <stdio.h>	//printf
+#include <stdlib.h>	//exit
+#include <sys/wait.h>	//wait	
+#include <sys/types.h>	//pid_t
+#include <string.h>	//scanf
 
 void interpreter();
 void execute(char*);
 void clear_vector(char**, int);
 void print_vector(char**, int, int);
-
-static int IT = 0;
 
 int main()
 {
@@ -28,27 +24,14 @@ int main()
 			interpreter();
 			break;
 		default:
-			/*
-			wait(&status);
-			printf("Status: %d \n", status);
-
-			if(status == 2)
-				main();
-			else
-				printf("\nTerminated. \n");
-
-			*/
 			waitpid(pid, &status, 0);
 
-			if(IT < MAX_IT)
-			{
-				IT++;
+			if(WEXITSTATUS(status)==1)
+				printf("Terminated.\n");
+			else 
 				main();
-			}
-			else
-				printf("\nTerminated. \n");
-			exit(0);
 
+			exit(0);
 			break;
 	}
 
@@ -61,15 +44,16 @@ void interpreter()
 	printf("DRB Command: ");
 
 	if(scanf("%[^\n]s", str) != 1)
-		printf("invalid.\n");
+		printf("- invalid.\n");
 	else if(strcmp(str, "q") == 0)
 	{
-		printf("DRB Command: exit\n");
-		kill(getppid(), SIGKILL);
-		exit(1);
+		printf("exit\n");
+		//kill(getppid(), SIGKILL);
 	}
 	else
 		execute(str);
+
+	exit(1);
 }
 
 void execute(char* str)
@@ -106,7 +90,6 @@ void execute(char* str)
 	printf("L'esecuzione del comando %s ha causato un errore..\n", flags[0]);
 	printf("Controlla la sintassi e riprova. \n");
 	printf("Codice di errore: %d \n", exe);
-	exit(2);
 }
 
 void clear_vector(char** arr, int size)
